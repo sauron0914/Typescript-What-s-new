@@ -1,2 +1,3 @@
-# Typescript-What-s-new
-Typescript What's new 翻译
+# Overview
+
+> 这个概述页面包含了一个`typescript`所有发布说明的简短版本，因为这个页面太大，代码示例禁用了它们的交互元素。
