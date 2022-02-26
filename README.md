@@ -106,3 +106,48 @@ function processOptions(opts: Options) {
 
 
 ### abstract Construct Signatures (抽象的构造函数)
+
+`TypeScript` 允许我们将一个类标记为抽象类。这告诉 `TypeScript` 该类仅用于扩展，并且某些成员需要由任何子类填充才能实际创建实例。
+
+TypeScript 4.2 允许您在构造函数签名上指定抽象修饰符。
+
+```ts
+abstract class Shape {
+  abstract getArea(): number;
+}
+// ---cut---
+interface HasArea {
+    getArea(): number;
+}
+// Works!
+let Ctor: abstract new () => HasArea = Shape;
+```
+
+将抽象修饰符添加到可以在抽象构造函数中传递的构造签名信号。它不会阻止你传入其他“具体”的类/构造函数——它实际上只是表明没有直接运行构造函数的意图，因此传入任一类类型都是安全的。
+
+这个特性允许我们以支持抽象类的方式编写 `mixin` 工厂。例如，在下面的代码片段中，我们可以将 `mixin` 函数 `withStyles` 与抽象类 `SuperClass` 一起使用。
+
+```ts
+abstract class SuperClass {
+    abstract someMethod(): void;
+    badda() {}
+}
+type AbstractConstructor<T> = abstract new (...args: any[]) => T
+function withStyles<T extends AbstractConstructor<object>>(Ctor: T) {
+    abstract class StyledClass extends Ctor {
+        getStyles() {
+            // ...
+        }
+    }
+    return StyledClass;
+}
+class SubClass extends withStyles(SuperClass) {
+    someMethod() {
+        this.someMethod()
+    }
+}
+```
+
+请注意， withStyles 正在演示特定规则，一个类（如 StyledClass）扩展了一个泛型值并由抽象构造函数（如 Ctor）界定，也必须声明为抽象。这是因为无法知道是否传入了具有更多抽象成员的类，因此无法知道子类是否实现了所有抽象成员。
+
+您可以在其[pull request](https://github.com/microsoft/TypeScript/pull/36392)中阅读更多关于抽象构造签名的信息。
