@@ -151,3 +151,57 @@ class SubClass extends withStyles(SuperClass) {
 请注意， withStyles 正在演示特定规则，一个类（如 StyledClass）扩展了一个泛型值并由抽象构造函数（如 Ctor）界定，也必须声明为抽象。这是因为无法知道是否传入了具有更多抽象成员的类，因此无法知道子类是否实现了所有抽象成员。
 
 您可以在其[pull request](https://github.com/microsoft/TypeScript/pull/36392)中阅读更多关于抽象构造签名的信息。
+
+### 了解您的项目结构 --解释文件(--explainFiles)
+
+对于 `TypeScript` 用户来说，一个令人惊讶的常见场景是问“为什么 `TypeScript` 包含这个文件？”。 推断程序的文件是一个复杂的过程，因此使用 `lib.d.ts` 的特定组合的原因有很多，为什么要包含 `node_modules` 中的某些文件，以及为什么要包含某些文件 即使我们认为指定排除会阻止它们。
+
+这就是 `TypeScript` 现在提供 [explainFiles](https://www.typescriptlang.org/tsconfig#explainFiles) 标志的原因。
+
+```sh
+tsc --explainFiles
+```
+
+使用此选项时，`TypeScript` 编译器会给出一些非常详细的输出，说明文件为何会出现在您的程序中。为了更容易阅读，您可以将输出转发到文件，或通过管道将其传输到可以轻松查看它的程序。
+
+```sh
+# Forward output to a text file
+tsc --explainFiles > expanation.txt
+# Pipe output to a utility program like `less`, or an editor like VS Code
+tsc --explainFiles | less
+tsc --explainFiles | code -
+```
+
+通常，输出将首先列出包含 `lib.d.ts` 文件的原因，然后是`本地文件`，然后是 `node_modules `文件。
+
+
+```sh
+TS_Compiler_Directory/4.2.2/lib/lib.es5.d.ts
+  Library referenced via 'es5' from file 'TS_Compiler_Directory/4.2.2/lib/lib.es2015.d.ts'
+TS_Compiler_Directory/4.2.2/lib/lib.es2015.d.ts
+  Library referenced via 'es2015' from file 'TS_Compiler_Directory/4.2.2/lib/lib.es2016.d.ts'
+TS_Compiler_Directory/4.2.2/lib/lib.es2016.d.ts
+  Library referenced via 'es2016' from file 'TS_Compiler_Directory/4.2.2/lib/lib.es2017.d.ts'
+TS_Compiler_Directory/4.2.2/lib/lib.es2017.d.ts
+  Library referenced via 'es2017' from file 'TS_Compiler_Directory/4.2.2/lib/lib.es2018.d.ts'
+TS_Compiler_Directory/4.2.2/lib/lib.es2018.d.ts
+  Library referenced via 'es2018' from file 'TS_Compiler_Directory/4.2.2/lib/lib.es2019.d.ts'
+TS_Compiler_Directory/4.2.2/lib/lib.es2019.d.ts
+  Library referenced via 'es2019' from file 'TS_Compiler_Directory/4.2.2/lib/lib.es2020.d.ts'
+TS_Compiler_Directory/4.2.2/lib/lib.es2020.d.ts
+  Library referenced via 'es2020' from file 'TS_Compiler_Directory/4.2.2/lib/lib.esnext.d.ts'
+TS_Compiler_Directory/4.2.2/lib/lib.esnext.d.ts
+  Library 'lib.esnext.d.ts' specified in compilerOptions
+
+... More Library References...
+
+foo.ts
+  Matched by include pattern '**/*' in 'tsconfig.json'
+```
+
+目前，我们不保证输出格式 - 它可能会随着时间而改变。关于这一点，如果您有任何建议，我们有兴趣改进此格式！
+
+有关更多信息，[check out the original pull request](https://github.com/microsoft/TypeScript/pull/40011)！
+
+### 改进了逻辑表达式中的未调用函数检查(Improved Uncalled Function Checks in Logical Expressions)
+
